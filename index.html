@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>µJobs — Microtrabajos cerca de ti</title>
+  <meta name="description" content="App para que jóvenes ganen dinero extra con microtrabajos locales: pasear perros, mudanzas, clases de refuerzo y más." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root { --ring: 0 0% 0%; }
+    html { font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'; }
+    .glass { backdrop-filter: blur(10px); background: rgba(255,255,255,0.75); }
+    @keyframes float { 0% { transform: translateY(0); } 50% { transform: translateY(-6px);} 100% { transform: translateY(0);} }
+  </style>
+</head>
+<body class="bg-gradient-to-b from-indigo-50 via-white to-white text-slate-900">
+  <!-- NAV -->
+  <header class="sticky top-0 z-30 bg-white/70 backdrop-blur border-b">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
+      <div class="w-9 h-9 rounded-2xl bg-slate-900 text-white grid place-items-center text-xl font-bold">µ</div>
+      <div class="font-semibold">µJobs</div>
+      <nav class="ml-auto hidden sm:flex items-center gap-6 text-sm text-slate-600">
+        <a href="#como-funciona" class="hover:text-slate-900">Cómo funciona</a>
+        <a href="#categorias" class="hover:text-slate-900">Categorías</a>
+        <a href="#seguridad" class="hover:text-slate-900">Seguridad</a>
+        <a href="#precio" class="hover:text-slate-900">Precio</a>
+      </nav>
+      <a href="#cta" class="ml-auto sm:ml-4 px-4 py-2 bg-slate-900 text-white rounded-2xl text-sm shadow hover:opacity-90">Quiero probar</a>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="relative overflow-hidden">
+    <div class="absolute inset-0 -z-10 opacity-70" aria-hidden="true">
+      <svg class="w-[1200px] h-[1200px] absolute -right-40 -top-40 animate-[float_7s_ease-in-out_infinite]" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop offset="0%" stop-color="#a5b4fc"/><stop offset="100%" stop-color="#c7d2fe"/></linearGradient></defs>
+        <path fill="url(#g)" d="M47.7,-64.7C61.9,-56.7,72.5,-41.7,77,-25.4C81.6,-9.1,80.1,9.4,72.7,23.8C65.4,38.1,52.2,48.3,38,58.1C23.8,67.9,8.6,77.3,-8.1,87.2C-24.8,97.2,-49.6,107.6,-62.9,99.2C-76.2,90.8,-78,63.6,-80,40.4C-82,17.3,-84.3,-1.8,-80.1,-18.5C-75.9,-35.2,-65.2,-49.6,-51.4,-58.3C-37.6,-67.1,-20.8,-70.2,-3.9,-65.3C13.1,-60.5,26.2,-47.8,47.7,-64.7Z" transform="translate(100 100)"/>
+      </svg>
+    </div>
+    <div class="max-w-6xl mx-auto px-4 py-16 md:py-24 grid md:grid-cols-2 gap-10 items-center">
+      <div>
+        <h1 class="text-4xl md:text-5xl font-extrabold leading-tight">Gana dinero extra con <span class="text-indigo-600">microtrabajos</span> cerca de ti</h1>
+        <p class="mt-4 text-slate-600 text-lg">Conecta en minutos con personas de tu zona que necesitan ayuda puntual: pasear un perro, echar una mano en una mudanza o dar clases de refuerzo.</p>
+        <div class="mt-6 flex flex-col sm:flex-row gap-3">
+          <a href="#cta" class="px-5 py-3 rounded-2xl bg-indigo-600 text-white font-medium shadow hover:bg-indigo-700">Empezar ahora</a>
+          <a href="#demo" class="px-5 py-3 rounded-2xl border font-medium shadow-sm hover:bg-white">Ver demo</a>
+        </div>
+        <div class="mt-4 text-sm text-slate-500">Pagos protegidos • Chat seguro • Valoraciones reales</div>
+      </div>
+      <div id="demo" class="bg-white/80 glass rounded-3xl p-4 shadow-xl border">
+        <!-- Mini demo de tarjetas -->
+        <div class="grid gap-3">
+          <div class="p-4 border rounded-2xl shadow-sm">
+            <div class="flex justify-between items-start">
+              <div>
+                <h3 class="font-semibold">Paseo de perro labrador</h3>
+                <p class="text-sm text-slate-600">Mascotas • 0,8 km</p>
+              </div>
+              <div class="font-bold">€12</div>
+            </div>
+            <p class="text-sm text-slate-700 mt-1">45 min por el barrio. Perro dócil.</p>
+          </div>
+          <div class="p-4 border rounded-2xl shadow-sm">
+            <div class="flex justify-between items-start">
+              <div>
+                <h3 class="font-semibold">Ayuda a subir 10 cajas</h3>
+                <p class="text-sm text-slate-600">Mudanzas • 2,1 km</p>
+              </div>
+              <div class="font-bold">€30</div>
+            </div>
+            <p class="text-sm text-slate-700 mt-1">Tercer piso sin ascensor. 1 hora.</p>
+          </div>
+          <div class="p-4 border rounded-2xl shadow-sm">
+            <div class="flex justify-between items-start">
+              <div>
+                <h3 class="font-semibold">Clases de mates 2º ESO</h3>
+                <p class="text-sm text-slate-600">Educación • 1,2 km</p>
+              </div>
+              <div class="font-bold">€18</div>
+            </div>
+            <p class="text-sm text-slate-700 mt-1">Fracciones y ecuaciones. 1h.</p>
+          </div>
+        </div>
+        <div class="mt-4">
+          <button id="open-modal" class="w-full px-4 py-2 rounded-2xl bg-slate-900 text-white text-sm">Ver más trabajos</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CÓMO FUNCIONA -->
+  <section id="como-funciona" class="max-w-6xl mx-auto px-4 py-14">
+    <h2 class="text-2xl md:text-3xl font-bold">Cómo funciona</h2>
+    <div class="mt-6 grid md:grid-cols-3 gap-6">
+      <div class="p-5 rounded-2xl border shadow-sm bg-white">
+        <div class="text-sm font-semibold text-indigo-700">1. Descubre</div>
+        <p class="text-slate-700 mt-1">Explora trabajos cercanos con filtros por categoría, horario y pago.</p>
+      </div>
+      <div class="p-5 rounded-2xl border shadow-sm bg-white">
+        <div class="text-sm font-semibold text-indigo-700">2. Postula</div>
+        <p class="text-slate-700 mt-1">Aplica en dos toques y chatea para coordinar detalles.</p>
+      </div>
+      <div class="p-5 rounded-2xl border shadow-sm bg-white">
+        <div class="text-sm font-semibold text-indigo-700">3. Cobra</div>
+        <p class="text-slate-700 mt-1">Pago protegido con depósito (escrow) y reseñas al finalizar.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CATEGORÍAS -->
+  <section id="categorias" class="max-w-6xl mx-auto px-4 py-14">
+    <h2 class="text-2xl md:text-3xl font-bold">Categorías destacadas</h2>
+    <div class="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <CatCard title="Paseo de perros" desc="Desde 30–60 min"/>
+      <CatCard title="Ayuda en mudanzas" desc="Cargas ligeras"/>
+      <CatCard title="Clases de refuerzo" desc="ESO y Bachillerato"/>
+      <CatCard title="Cuidado de niños" desc="Canguro ocasional"/>
+      <CatCard title="Recados y compras" desc="Entrega en portal"/>
+      <CatCard title="Montaje de muebles" desc="Básico"/>
+    </div>
+  </section>
+
+  <!-- SEGURIDAD -->
+  <section id="seguridad" class="max-w-6xl mx-auto px-4 py-14">
+    <h2 class="text-2xl md:text-3xl font-bold">Confianza y seguridad, primero</h2>
+    <ul class="mt-4 grid md:grid-cols-2 gap-3 text-slate-700">
+      <li class="p-4 rounded-2xl border bg-white">Verificación básica de identidad (DNI + teléfono).</li>
+      <li class="p-4 rounded-2xl border bg-white">Chat seguro y moderación para evitar fraudes.</li>
+      <li class="p-4 rounded-2xl border bg-white">Depósito en garantía y sistema de disputas.</li>
+      <li class="p-4 rounded-2xl border bg-white">Reseñas verificadas y métricas de fiabilidad.</li>
+    </ul>
+  </section>
+
+  <!-- PRECIO -->
+  <section id="precio" class="max-w-6xl mx-auto px-4 py-14">
+    <h2 class="text-2xl md:text-3xl font-bold">Precio transparente</h2>
+    <div class="mt-6 grid md:grid-cols-3 gap-6">
+      <div class="p-6 rounded-2xl border bg-white shadow-sm">
+        <div class="text-sm font-semibold text-slate-500">Publicar</div>
+        <div class="text-3xl font-extrabold mt-1">€0</div>
+        <p class="text-slate-600 mt-2">Publica trabajos sin coste. Pagas solo si se completa.</p>
+      </div>
+      <div class="p-6 rounded-2xl border bg-white shadow-sm ring-2 ring-indigo-600">
+        <div class="text-sm font-semibold text-indigo-700">Comisión</div>
+        <div class="text-3xl font-extrabold mt-1">10–15%</div>
+        <p class="text-slate-600 mt-2">Incluye pago protegido, soporte y seguro básico.</p>
+      </div>
+      <div class="p-6 rounded-2xl border bg-white shadow-sm">
+        <div class="text-sm font-semibold text-slate-500">Pro (opcional)</div>
+        <div class="text-3xl font-extrabold mt-1">€6/mes</div>
+        <p class="text-slate-600 mt-2">Mejor posicionamiento y 0% comisión en 3 trabajos/mes.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section id="cta" class="max-w-6xl mx-auto px-4 py-16">
+    <div class="rounded-3xl border shadow-sm bg-gradient-to-r from-indigo-600 to-indigo-500 text-white p-6 md:p-10 grid md:grid-cols-2 gap-6 items-center">
+      <div>
+        <h3 class="text-2xl md:text-3xl font-extrabold">¿Listo para tu primer microtrabajo?</h3>
+        <p class="mt-2 text-indigo-100">Déjanos tu email y te avisamos cuando esté disponible en tu ciudad.</p>
+      </div>
+      <form id="lead" class="flex flex-col sm:flex-row gap-3">
+        <input required type="email" placeholder="tu@email.com" class="flex-1 px-4 py-3 rounded-2xl text-slate-900" />
+        <button class="px-5 py-3 rounded-2xl bg-white text-slate-900 font-semibold hover:opacity-90">Avisadme</button>
+      </form>
+    </div>
+  </section>
+
+  <footer class="max-w-6xl mx-auto px-4 py-10 text-sm text-slate-500">
+    <div class="flex flex-col sm:flex-row gap-2 sm:items-center">
+      <div class="font-semibold text-slate-700">µJobs</div>
+      <div class="sm:ml-auto">© <span id="year"></span> µJobs — Hecho con cariño en España</div>
+    </div>
+  </footer>
+
+  <!-- Modal simple -->
+  <div id="modal" class="fixed inset-0 z-40 hidden">
+    <div class="absolute inset-0 bg-black/40" aria-hidden="true"></div>
+    <div class="absolute inset-0 grid place-items-center p-4">
+      <div class="bg-white rounded-3xl p-5 w-full max-w-lg shadow-2xl border">
+        <div class="flex items-start justify-between">
+          <h3 class="font-semibold text-lg">Trabajos cerca de ti</h3>
+          <button id="close-modal" class="text-slate-500 hover:text-slate-800">✕</button>
+        </div>
+        <div class="mt-3 grid gap-3 max-h-[60vh] overflow-auto">
+          <!-- elementos de lista simulados -->
+          <div class="p-3 rounded-2xl border">
+            <div class="flex justify-between"><div class="font-medium">Recado supermercado</div><div class="font-bold">€9</div></div>
+            <div class="text-xs text-slate-500">0,4 km • 35 min</div>
+          </div>
+          <div class="p-3 rounded-2xl border">
+            <div class="flex justify-between"><div class="font-medium">Canguro 2 horas</div><div class="font-bold">€20</div></div>
+            <div class="text-xs text-slate-500">1,0 km • 2 h</div>
+          </div>
+          <div class="p-3 rounded-2xl border">
+            <div class="flex justify-between"><div class="font-medium">Montaje estantería</div><div class="font-bold">€15</div></div>
+            <div class="text-xs text-slate-500">1,5 km • 45 min</div>
+          </div>
+          <!-- ... -->
+        </div>
+        <div class="mt-4 flex justify-end">
+          <button id="go-app" class="px-4 py-2 rounded-2xl bg-slate-900 text-white">Quiero la app</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // utilidades
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // modal
+    const $modal = document.getElementById('modal');
+    document.getElementById('open-modal').addEventListener('click', () => $modal.classList.remove('hidden'));
+    document.getElementById('close-modal').addEventListener('click', () => $modal.classList.add('hidden'));
+    document.getElementById('go-app').addEventListener('click', () => {
+      $modal.classList.add('hidden');
+      document.getElementById('cta').scrollIntoView({ behavior: 'smooth' });
+    });
+
+    // captura de leads (demo sin backend)
+    document.getElementById('lead').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = e.target.querySelector('input').value;
+      alert('¡Gracias! Te avisaremos en cuanto lancemos: ' + email);
+      e.target.reset();
+    });
+
+    // Componente Category Card inline
+    function CatCard(props){ return null }
+  </script>
+
+  <!-- Tiny component renderer para CatCard (sin frameworks) -->
+  <script>
+    function renderCatCards(){
+      const nodes = document.querySelectorAll('cat-card');
+      nodes.forEach(n => {
+        const title = n.getAttribute('title');
+        const desc = n.getAttribute('desc');
+        n.outerHTML = `<div class=\"p-5 rounded-2xl border bg-white shadow-sm hover:shadow-md transition\">`
+          + `<div class=\"font-semibold\">${title}</div>`
+          + `<div class=\"text-slate-600 text-sm mt-1\">${desc}</div>`
+          + `</div>`;
+      });
+    }
+    // Reemplaza las etiquetas <CatCard .../> por HTML
+    document.querySelectorAll('CatCard, cat-card').forEach(n => {
+      const title = n.getAttribute('title');
+      const desc = n.getAttribute('desc');
+      n.outerHTML = `<div class=\"p-5 rounded-2xl border bg-white shadow-sm hover:shadow-md transition\">`
+        + `<div class=\"font-semibold\">${title}</div>`
+        + `<div class=\"text-slate-600 text-sm mt-1\">${desc}</div>`
+        + `</div>`;
+    });
+  </script>
+</body>
+</html>
