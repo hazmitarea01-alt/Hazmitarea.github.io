@@ -362,5 +362,63 @@
     chatMessages.scrollTop = chatMessages.scrollHeight;
   }
 </script> 
+  <script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyBlsVCnScpWppXMQLvAtu54XS_2rxj84Eo",
+    authDomain: "hazmitarea01-ab6c6.firebaseapp.com",
+    projectId: "hazmitarea01-ab6c6",
+    storageBucket: "hazmitarea01-ab6c6.firebasestorage.app",
+    messagingSenderId: "771122045443",
+    appId: "1:771122045443:web:86ebc251ab550466b46436"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+</script>
+    <!-- Tus otros scripts ya existentes -->
+
+  <!-- 👇 Aquí pegas el bloque de Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js"></script>
+
+  <script>
+    const firebaseConfig = { 
+      apiKey: "AIzaSyBIsVCnScpWppXMQLvAtu54XS_2rxj84Eo",
+      authDomain: "hazmitarea01-ab6c6.firebaseapp.com",
+      projectId: "hazmitarea01-ab6c6",
+      storageBucket: "hazmitarea01-ab6c6.appspot.com",
+      messagingSenderId: "771122045443",
+      appId: "1:771122045443:web:86ebc251ab550466b46436"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    function loginGoogle() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider)
+        .then((result) => {
+          const user = result.user;
+          alert("👋 Bienvenido " + user.displayName);
+          console.log(user);
+        })
+        .catch((error) => {
+          console.error(error);
+          alert("❌ Error: " + error.message);
+        });
+    }
+
+    function logout() {
+      auth.signOut().then(() => {
+        alert("👋 Sesión cerrada");
+      });
+    }
+  </script>
 </body>
 </html>
