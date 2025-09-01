@@ -18,19 +18,32 @@
 </head>
 <body class="bg-gradient-to-b from-orange-50 via-white to-white text-slate-900">
   <!-- NAV -->
-  <header class="sticky top-0 z-30 bg-white/70 backdrop-blur border-b">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
-      <div class="w-9 h-9 rounded-2xl bg-slate-900 text-white grid place-items-center text-xl font-bold">µ</div>
-      <div class="font-semibold">HazMiTarea</div>
-      <nav class="ml-auto hidden sm:flex items-center gap-6 text-sm text-slate-600">
-        <a href="#como-funciona" class="hover:text-slate-900">Cómo funciona</a>
-        <a href="#categorias" class="hover:text-slate-900">Categorías</a>
-        <a href="#seguridad" class="hover:text-slate-900">Seguridad</a>
-        <a href="#precio" class="hover:text-slate-900">Precio</a>
-      </nav>
-      <a href="#cta" class="ml-auto sm:ml-4 px-4 py-2 bg-slate-900 text-white rounded-2xl text-sm shadow hover:opacity-90">Quiero probar</a>
+<header class="sticky top-0 z-30 bg-white/70 backdrop-blur border-b">
+  <div class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
+    <div class="w-9 h-9 rounded-2xl bg-slate-900 text-white grid place-items-center text-xl font-bold">µ</div>
+    <div class="font-semibold">HazMiTarea</div>
+    
+    <nav class="ml-auto hidden sm:flex items-center gap-6 text-sm text-slate-600">
+      <a href="#como-funciona" class="hover:text-slate-900">Cómo funciona</a>
+      <a href="#categorias" class="hover:text-slate-900">Categorías</a>
+      <a href="#seguridad" class="hover:text-slate-900">Seguridad</a>
+      <a href="#precio" class="hover:text-slate-900">Precio</a>
+    </nav>
+
+    <!-- Botones de login/logout -->
+    <div class="ml-4 flex gap-2 items-center">
+      <button id="loginBtn" onclick="loginGoogle()" 
+        class="px-3 py-2 bg-orange-600 text-white rounded-xl text-sm shadow hover:bg-orange-700">
+        Iniciar sesión
+      </button>
+      <button id="logoutBtn" onclick="logout()" 
+        class="px-3 py-2 bg-gray-300 text-slate-900 rounded-xl text-sm shadow hover:bg-gray-400 hidden">
+        Cerrar sesión
+      </button>
     </div>
-  </header>
+  </div>
+</header>
+
 
   <!-- HERO -->
   <section class="relative overflow-hidden">
