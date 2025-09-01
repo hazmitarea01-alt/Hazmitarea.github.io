@@ -351,32 +351,10 @@
     chatInput.value = "";
 
     // Respuesta simple (demo)
-    // Diccionario de preguntas y respuestas
-const respuestas = {
-  "precio": "Nuestros precios dependen del servicio. ¿Sobre qué trabajo quieres saber?",
-  "horario": "Estamos disponibles de lunes a viernes de 9 a 18 hrs.",
-  "hola": "¡Hola! 👋 ¿En qué puedo ayudarte hoy?",
-  "contacto": "Puedes escribirnos por aquí mismo o al correo: soporte@hazmitarea.com",
-  "pago": "El pago es seguro mediante depósito y se libera al finalizar el trabajo. 💳"
-};
-
-// Función para obtener la respuesta
-function obtenerRespuesta(userMessage) {
-  userMessage = userMessage.toLowerCase();
-
-  for (let palabraClave in respuestas) {
-    if (userMessage.includes(palabraClave)) {
-      return respuestas[palabraClave];
-    }
-  }
-
-  return "Gracias por tu consulta. Estoy mejorando para responder de forma más inteligente. 🙌";
-}
-
-setTimeout(() => {
-  const respuesta = obtenerRespuesta(userMessage); 
-  addMessage(respuesta, "bot");
+    setTimeout(() => {
+  addMessage("Gracias por tu consulta. Estoy mejorando para responder de forma más inteligente. 🙌", "bot");
 }, 800);
+
 
 
   // Botones FAQ
