@@ -379,63 +379,68 @@
     chatMessages.scrollTop = chatMessages.scrollHeight;
   }
 </script> 
-  <script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
 
-  // Your web app's Firebase configuration
-  const firebaseConfig = {
-    apiKey: "AIzaSyBlsVCnScpWppXMQLvAtu54XS_2rxj84Eo",
-    authDomain: "hazmitarea01-ab6c6.firebaseapp.com",
-    projectId: "hazmitarea01-ab6c6",
-    storageBucket: "hazmitarea01-ab6c6.firebasestorage.app",
-    messagingSenderId: "771122045443",
-    appId: "1:771122045443:web:86ebc251ab550466b46436"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-</script>
     <!-- Tus otros scripts ya existentes -->
 
   <!-- 👇 Aquí pegas el bloque de Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js"></script>
 
-  <script>
-    const firebaseConfig = { 
-      apiKey: "AIzaSyBIsVCnScpWppXMQLvAtu54XS_2rxj84Eo",
-      authDomain: "hazmitarea01-ab6c6.firebaseapp.com",
-      projectId: "hazmitarea01-ab6c6",
-      storageBucket: "hazmitarea01-ab6c6.appspot.com",
-      messagingSenderId: "771122045443",
-      appId: "1:771122045443:web:86ebc251ab550466b46436"
-    };
+  <script type="module">
+  // Importar Firebase SDK
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
+    from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
+  // Configuración de Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyBlsVCnScpWppXMQLvAtu54XS_2rxj84Eo",
+    authDomain: "hazmitarea01-ab6c6.firebaseapp.com",
+    projectId: "hazmitarea01-ab6c6",
+    storageBucket: "hazmitarea01-ab6c6.appspot.com",
+    messagingSenderId: "771122045443",
+    appId: "1:771122045443:web:86ebc251ab550466b46436"
+  };
 
-    function loginGoogle() {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider)
-        .then((result) => {
-          const user = result.user;
-          alert("👋 Bienvenido " + user.displayName);
-          console.log(user);
-        })
-        .catch((error) => {
-          console.error(error);
-          alert("❌ Error: " + error.message);
-        });
+  // Inicializar Firebase
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
+
+  // Referencias a botones
+  const loginBtn = document.getElementById("loginBtn");
+  const logoutBtn = document.getElementById("logoutBtn");
+
+  // Iniciar sesión con Google
+  loginBtn.addEventListener("click", async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      alert("👋 Bienvenido " + user.displayName);
+      console.log(user);
+    } catch (error) {
+      console.error(error);
+      alert("❌ Error: " + error.message);
     }
+  });
 
-    function logout() {
-      auth.signOut().then(() => {
-        alert("👋 Sesión cerrada");
-      });
+  // Cerrar sesión
+  logoutBtn.addEventListener("click", async () => {
+    await signOut(auth);
+    alert("👋 Sesión cerrada");
+  });
+
+  // Detectar cambios de sesión
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      loginBtn.classList.add("hidden");
+      logoutBtn.classList.remove("hidden");
+    } else {
+      loginBtn.classList.remove("hidden");
+      logoutBtn.classList.add("hidden");
     }
-  </script>
+  });
+</script>
+
 </body>
 </html>
