@@ -186,6 +186,52 @@
   </div>
 </section>
 
+<!-- FORMULARIO DE NUEVO TRABAJO -->
+<section id="nuevo-trabajo" class="max-w-6xl mx-auto px-4 py-14">
+  <h2 class="text-2xl md:text-3xl font-bold mb-6">Publica tu microtrabajo</h2>
+
+  <div id="login-warning" class="bg-orange-100 text-orange-800 p-4 rounded-xl mb-4 hidden">
+    Debes <b>iniciar sesión</b> para poder publicar un trabajo.
+  </div>
+
+  <form id="formTrabajo" class="space-y-4 bg-white p-6 rounded-2xl shadow border hidden">
+    <div>
+      <label class="block text-sm font-medium text-slate-700">Título</label>
+      <input type="text" id="titulo" required class="w-full border rounded-lg px-3 py-2 mt-1" placeholder="Ej: Pasear perro labrador" />
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-slate-700">Categoría</label>
+      <select id="categoria" required class="w-full border rounded-lg px-3 py-2 mt-1">
+        <option value="">Selecciona una</option>
+        <option value="mudanzas">Ayuda en mudanzas</option>
+        <option value="paseo">Paseo de perros</option>
+        <option value="clases">Clases de repaso</option>
+        <option value="cuidado">Cuidado de niños</option>
+        <option value="recados">Recados y compras</option>
+        <option value="montaje">Montaje de muebles</option>
+      </select>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-slate-700">Descripción</label>
+      <textarea id="descripcion" rows="3" required class="w-full border rounded-lg px-3 py-2 mt-1" placeholder="Detalla qué necesitas..."></textarea>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-slate-700">Precio (€)</label>
+      <input type="number" id="precio" min="1" required class="w-full border rounded-lg px-3 py-2 mt-1" />
+    </div>
+
+    <button type="submit" class="px-5 py-3 bg-orange-600 text-white rounded-xl font-medium hover:bg-orange-700">
+      Publicar trabajo
+    </button>
+  </form>
+
+  <div id="mensaje-exito" class="hidden bg-green-100 text-green-800 p-4 rounded-xl mt-4">
+    🎉 Trabajo publicado correctamente.
+  </div>
+</section>
 
   <!-- SEGURIDAD -->
   <section id="seguridad" class="max-w-6xl mx-auto px-4 py-14">
@@ -465,6 +511,70 @@
 
   // Exponer db/funciones globalmente si quieres usar desde otros scripts
   window.__FIREBASE = { app, auth, db, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot, onAuthStateChanged };
+</script>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBlsVCnScpWppXMQLvAtu54XS_2rxj84Eo",
+    authDomain: "hazmitarea01-ab6c6.firebaseapp.com",
+    projectId: "hazmitarea01-ab6c6",
+    storageBucket: "hazmitarea01-ab6c6.appspot.com",
+    messagingSenderId: "771122045443",
+    appId: "1:771122045443:web:86ebc251ab550466b46436"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const auth = getAuth(app);
+
+  const form = document.getElementById("formTrabajo");
+  const loginWarning = document.getElementById("login-warning");
+  const successMsg = document.getElementById("mensaje-exito");
+
+  // Mostrar formulario solo si el usuario está logueado
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      form.classList.remove("hidden");
+      loginWarning.classList.add("hidden");
+    } else {
+      form.classList.add("hidden");
+      loginWarning.classList.remove("hidden");
+    }
+  });
+
+  // Enviar datos a Firestore
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const user = auth.currentUser;
+    if (!user) return alert("Debes iniciar sesión para publicar.");
+
+    const titulo = document.getElementById("titulo").value;
+    const categoria = document.getElementById("categoria").value;
+    const descripcion = document.getElementById("descripcion").value;
+    const precio = parseFloat(document.getElementById("precio").value);
+
+    try {
+      await addDoc(collection(db, "jobs"), {
+        titulo,
+        categoria,
+        descripcion,
+        precio,
+        ownerUid: user.uid,
+        ownerEmail: user.email,
+        fecha: new Date().toISOString()
+      });
+      form.reset();
+      successMsg.classList.remove("hidden");
+      setTimeout(() => successMsg.classList.add("hidden"), 4000);
+    } catch (err) {
+      console.error(err);
+      alert("❌ Error al guardar: " + err.message);
+    }
+  });
 </script>
 
 </body>
