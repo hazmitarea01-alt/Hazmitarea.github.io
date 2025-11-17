@@ -701,6 +701,42 @@
     });
   });
 </script>
+<script type="module">
+  import { getFirestore, collection, query, orderBy, onSnapshot } 
+    from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+  import { getAuth } 
+    from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+
+  const db = getFirestore();
+  const auth = getAuth();
+
+  const jobsContainer = document.getElementById("jobsContainer");
+
+  // Escuchar cambios en tiempo real
+  const q = query(collection(db, "jobs"), orderBy("fecha", "desc"));
+
+  onSnapshot(q, (snapshot) => {
+    jobsContainer.innerHTML = "";
+
+    snapshot.forEach(doc => {
+      const job = doc.data();
+      const id = doc.id;
+
+      jobsContainer.innerHTML += `
+        <div 
+          class="p-4 border rounded-xl shadow hover:shadow-lg cursor-pointer transition"
+          onclick="window.location.href='chat.html?job=${id}'"
+        >
+          <h3 class="font-bold text-lg">${job.titulo}</h3>
+          <p class="text-sm text-slate-600">${job.categoria}</p>
+          <p class="text-slate-700 mt-1">${job.descripcion.substring(0, 70)}...</p>
+          <div class="font-bold text-orange-600 mt-2">€${job.precio}</div>
+        </div>
+      `;
+    });
+  });
+</script>
+
 
 </body>
 </html>
