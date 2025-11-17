@@ -642,27 +642,40 @@
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  // Contenedor donde se mostrarán los trabajos
   const container = document.getElementById("jobsContainer");
+  const filtroBtns = document.querySelectorAll(".filtro");
 
-  // Escuchar en tiempo real
+  let trabajos = [];
+  let filtroActual = "todos";
+
   const q = query(collection(db, "jobs"), orderBy("fecha", "desc"));
 
   onSnapshot(q, (snapshot) => {
-    container.innerHTML = ""; // limpiar
-    snapshot.forEach(doc => {
-      const job = doc.data();
+    trabajos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    render();
+  });
 
-      const card = `
-        <div class="p-4 border rounded-xl bg-white shadow hover:shadow-lg transition">
-          <h3 class="font-bold text-lg">${job.titulo}</h3>
-          <p class="text-sm text-gray-600 capitalize">${job.categoria}</p>
-          <p class="text-sm mt-2 text-slate-700">${job.descripcion}</p>
-          <div class="mt-3 font-bold text-orange-600 text-lg">€${job.precio}</div>
-        </div>
-      `;
+  function render() {
+    container.innerHTML = "";
 
-      container.innerHTML += card;
+    trabajos
+      .filter(t => filtroActual === "todos" || t.categoria === filtroActual)
+      .forEach(t => {
+        container.innerHTML += `
+          <div class="p-4 border rounded-xl bg-white shadow hover:shadow-lg transition">
+            <h3 class="font-bold text-lg">${t.titulo}</h3>
+            <p class="text-sm text-gray-600 capitalize">${t.categoria}</p>
+            <p class="text-sm mt-2 text-slate-700">${t.descripcion}</p>
+            <div class="mt-3 font-bold text-orange-600 text-lg">€${t.precio}</div>
+          </div>
+        `;
+      });
+  }
+
+  filtroBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      filtroActual = btn.dataset.cat;
+      render();
     });
   });
 </script>
