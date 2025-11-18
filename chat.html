@@ -50,7 +50,7 @@
 
   // Obtener ID del trabajo desde la URL
   const params = new URLSearchParams(window.location.search);
-  const jobId = params.get("id");
+ const jobId = params.get("job");
 
   const tituloTrabajoEl = document.getElementById("tituloTrabajo");
   const mensajesEl = document.getElementById("mensajes");
@@ -68,44 +68,52 @@
     }
 
     tituloTrabajoEl.textContent = snap.data().titulo;
+    window.ownerUid = snap.data().ownerUid;
+
   }
 
   // Chat en tiempo real
-  function iniciarChat(uid) {
-    const mensajesRef = collection(db, "jobs", jobId, "chat");
-    const q = query(mensajesRef, orderBy("fecha", "asc"));
+ function iniciarChat(uid) {
+  const ownerUid = window.ownerUid;
 
-    onSnapshot(q, (snap) => {
-      mensajesEl.innerHTML = "";
+  // Crear ID único del chat
+  const chatId = uid < ownerUid ? `${uid}_${ownerUid}` : `${ownerUid}_${uid}`;
 
-      snap.forEach(docu => {
-        const m = docu.data();
-        const alineacion = m.uid === uid ? "text-right" : "text-left";
-        const color = m.uid === uid ? "bg-orange-200" : "bg-gray-200";
+  const mensajesRef = collection(db, "jobs", jobId, "chats", chatId, "mensajes");
+  const q = query(mensajesRef, orderBy("fecha", "asc"));
 
-        mensajesEl.innerHTML += `
-          <div class="${alineacion}">
-            <span class="inline-block px-3 py-2 rounded-lg ${color} mt-1">${m.texto}</span>
-          </div>
-        `;
-      });
+  // escuchar mensajes
+  onSnapshot(q, (snap) => {
+    mensajesEl.innerHTML = "";
 
-      mensajesEl.scrollTop = mensajesEl.scrollHeight;
+    snap.forEach(docu => {
+      const m = docu.data();
+      const alineacion = m.uid === uid ? "text-right" : "text-left";
+      const color = m.uid === uid ? "bg-orange-200" : "bg-gray-200";
+
+      mensajesEl.innerHTML += `
+        <div class="${alineacion}">
+          <span class="inline-block px-3 py-2 rounded-lg ${color} mt-1">${m.texto}</span>
+        </div>
+      `;
     });
 
-    // Enviar mensaje
-    formChat.addEventListener("submit", async (e) => {
-      e.preventDefault();
+    mensajesEl.scrollTop = mensajesEl.scrollHeight;
+  });
 
-      await addDoc(mensajesRef, {
-        texto: msgInput.value,
-        uid: uid,
-        fecha: serverTimestamp()
-      });
+  // Enviar mensajes
+  formChat.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-      msgInput.value = "";
+    await addDoc(mensajesRef, {
+      texto: msgInput.value,
+      uid: uid,
+      fecha: serverTimestamp()
     });
-  }
+
+    msgInput.value = "";
+  });
+}
 
   // Detectar si usuario está logueado
   onAuthStateChanged(auth, (user) => {
