@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mis chats — HazMiTarea</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-orange-50">
+
+<header class="p-4 bg-orange-600 text-white font-bold">
+  Mis chats
+</header>
+
+<main class="max-w-3xl mx-auto mt-6 flex flex-col gap-3">
+  <div id="chatsContainer" class="flex flex-col gap-2">
+    <!-- Aquí se cargarán todos los chats del usuario -->
+    <p class="text-gray-500">Cargando chats...</p>
+  </div>
+</main>
+<script type="module">
+import { getFirestore, collection, query, where, onSnapshot, doc, getDoc } 
+  from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } 
+  from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+
+const db = getFirestore();
+const auth = getAuth();
+
+const chatsContainer = document.getElementById("chatsContainer");
+let currentUser;
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    alert("Debes iniciar sesión para ver tus chats");
+    window.location.href = "/";
+    return;
+  }
+
+  currentUser = user;
+
+  // Consulta todos los mensajes enviados por el usuario
+  const chatQuery = query(
+    collection(db, "chats"),
+    where("senderUid", "==", currentUser.uid)
+  );
+
+  onSnapshot(chatQuery, async (snapshot) => {
+    const chatsMap = {};
+
+    snapshot.forEach(doc => {
+      const msg = doc.data();
+      // Agrupar mensajes por jobId
+      if (!chatsMap[msg.jobId]) chatsMap[msg.jobId] = [];
+      chatsMap[msg.jobId].push(msg);
+    });
+
+    // Limpiar contenedor
+    chatsContainer.innerHTML = "";
+
+    if (Object.keys(chatsMap).length === 0) {
+      chatsContainer.innerHTML = "<p class='text-gray-500'>No tienes chats todavía.</p>";
+      return;
+    }
+
+    // Mostrar lista de chats
+    for (const [jobId, messages] of Object.entries(chatsMap)) {
+      const lastMsg = messages[messages.length - 1];
+
+      // Obtener título del trabajo desde Firestore
+      const jobSnap = await getDoc(doc(db, "jobs", jobId));
+      let jobTitle = jobId;
+      if (jobSnap.exists()) jobTitle = jobSnap.data().titulo;
+
+      const div = document.createElement("div");
+      div.className = "p-4 border rounded-xl bg-white shadow hover:shadow-lg cursor-pointer flex justify-between items-center";
+      div.innerHTML = `
+        <div>
+          <div class="font-bold truncate">${jobTitle}</div>
+          <div class="text-gray-600 text-sm truncate">${lastMsg.text}</div>
+        </div>
+        <div class="text-gray-400 text-xs">Último mensaje</div>
+      `;
+
+      // Al hacer clic, ir al chat del trabajo
+      div.addEventListener("click", () => {
+        window.location.href = `chat.html?job=${jobId}`;
+      });
+
+      chatsContainer.appendChild(div);
+    }
+  });
+});
+</script>
+
+
+</body>
+</html>
