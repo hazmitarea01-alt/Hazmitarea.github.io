@@ -112,21 +112,33 @@ function iniciarChat(user) {
     mensajesEl.scrollTop = mensajesEl.scrollHeight;
   });
 
-  // Enviar mensaje
-  formChat.onsubmit = async (e) => {
-    e.preventDefault();
+  formChat.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-    const texto = msgInput.value.trim();
-    if (!texto) return;
+  const texto = msgInput.value.trim();
+  if (!texto) return;
 
-    // Guardar mensaje
-    await addDoc(collection(db, "messages"), {
-      chatId,
-      jobId,
-      uid: user.uid,
-      texto,
-      fecha: serverTimestamp()
-    });
+  console.log("📨 Enviando mensaje:", texto);
+
+  await addDoc(collection(db, "messages"), {
+    chatId,
+    jobId,
+    uid: user.uid,
+    texto,
+    fecha: serverTimestamp()
+  });
+
+  await setDoc(doc(db, "userChats", chatId), {
+    chatId,
+    jobId,
+    users: [user.uid, ownerUid],
+    lastMessage: texto,
+    updatedAt: serverTimestamp()
+  }, { merge: true });
+
+  msgInput.value = "";
+});
+
 
     // Actualizar resumen de chat
     await setDoc(doc(db, "userChats", chatId), {
