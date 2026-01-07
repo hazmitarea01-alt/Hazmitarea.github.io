@@ -19,79 +19,69 @@
   </div>
 </main>
 <script type="module">
-import { getFirestore, collection, query, where, onSnapshot, doc, getDoc } 
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { getFirestore, collectionGroup, query, where, onSnapshot, doc, getDoc } 
   from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
-import { getAuth, onAuthStateChanged } 
-  from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
-const db = getFirestore();
-const auth = getAuth();
+const firebaseConfig = {
+  apiKey: "AIzaSyBlsVCnScpWppXMQLvAtu54XS_2rxj84Eo",
+  authDomain: "hazmitarea01-ab6c6.firebaseapp.com",
+  projectId: "hazmitarea01-ab6c6",
+  storageBucket: "hazmitarea01-ab6c6.appspot.com",
+  messagingSenderId: "771122045443",
+  appId: "1:771122045443:web:86ebc251ab550466b46436"
+};
 
-const chatsContainer = document.getElementById("chatsContainer");
-let currentUser;
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-onAuthStateChanged(auth, async (user) => {
+const container = document.getElementById("chatsContainer");
+
+onAuthStateChanged(auth, (user) => {
   if (!user) {
-    alert("Debes iniciar sesión para ver tus chats");
-    window.location.href = "/";
+    alert("Debes iniciar sesión");
+    window.location.href = "index.html";
     return;
   }
 
-  currentUser = user;
-
-  // Consulta todos los mensajes enviados por el usuario
-  const chatQuery = query(
-    collection(db, "chats"),
-    where("senderUid", "==", currentUser.uid)
+  const q = query(
+    collectionGroup(db, "chats"),
+    where("participants", "array-contains", user.uid)
   );
 
-  onSnapshot(chatQuery, async (snapshot) => {
-    const chatsMap = {};
+  onSnapshot(q, async (snapshot) => {
+    container.innerHTML = "";
 
-    snapshot.forEach(doc => {
-      const msg = doc.data();
-      // Agrupar mensajes por jobId
-      if (!chatsMap[msg.jobId]) chatsMap[msg.jobId] = [];
-      chatsMap[msg.jobId].push(msg);
-    });
-
-    // Limpiar contenedor
-    chatsContainer.innerHTML = "";
-
-    if (Object.keys(chatsMap).length === 0) {
-      chatsContainer.innerHTML = "<p class='text-gray-500'>No tienes chats todavía.</p>";
+    if (snapshot.empty) {
+      container.innerHTML = "<p class='text-gray-500'>No tienes chats todavía.</p>";
       return;
     }
 
-    // Mostrar lista de chats
-    for (const [jobId, messages] of Object.entries(chatsMap)) {
-      const lastMsg = messages[messages.length - 1];
-
-      // Obtener título del trabajo desde Firestore
-      const jobSnap = await getDoc(doc(db, "jobs", jobId));
-      let jobTitle = jobId;
-      if (jobSnap.exists()) jobTitle = jobSnap.data().titulo;
+    for (const docSnap of snapshot.docs) {
+      const chat = docSnap.data();
+      const jobSnap = await getDoc(doc(db, "jobs", chat.jobId));
+      const titulo = jobSnap.exists() ? jobSnap.data().titulo : "Trabajo";
 
       const div = document.createElement("div");
-      div.className = "p-4 border rounded-xl bg-white shadow hover:shadow-lg cursor-pointer flex justify-between items-center";
+      div.className = "p-4 bg-white rounded-xl shadow hover:shadow-lg cursor-pointer";
+
       div.innerHTML = `
-        <div>
-          <div class="font-bold truncate">${jobTitle}</div>
-          <div class="text-gray-600 text-sm truncate">${lastMsg.text}</div>
-        </div>
-        <div class="text-gray-400 text-xs">Último mensaje</div>
+        <div class="font-bold">${titulo}</div>
+        <div class="text-sm text-gray-500">Abrir conversación</div>
       `;
 
-      // Al hacer clic, ir al chat del trabajo
-      div.addEventListener("click", () => {
-        window.location.href = `chat.html?job=${jobId}`;
-      });
+      div.onclick = () => {
+        window.location.href = `chat.html?job=${chat.jobId}`;
+      };
 
-      chatsContainer.appendChild(div);
+      container.appendChild(div);
     }
   });
 });
 </script>
+
 
 
 </body>
