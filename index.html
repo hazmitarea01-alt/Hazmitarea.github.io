@@ -617,6 +617,85 @@ filtroBtns.forEach(btn => {
 });
 </script>
 
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { getFirestore, collection, query, orderBy, onSnapshot } 
+  from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+// 🔐 Firebase config (la tuya)
+const firebaseConfig = {
+  apiKey: "AIzaSyBlsVCnScpWppXMQLvAtu54XS_2rxj84Eo",
+  authDomain: "hazmitarea01-ab6c6.firebaseapp.com",
+  projectId: "hazmitarea01-ab6c6",
+  storageBucket: "hazmitarea01-ab6c6.appspot.com",
+  messagingSenderId: "771122045443",
+  appId: "1:771122045443:web:86ebc251ab550466b46436"
+};
+
+// 🚀 Init
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// 🎯 DOM
+const container = document.getElementById("jobsContainer");
+const filtros = document.querySelectorAll(".filtro");
+
+// 📦 Estado
+let trabajos = [];
+let filtroActual = "todos";
+
+// 📡 Escuchar trabajos en tiempo real
+const q = query(collection(db, "jobs"), orderBy("fecha", "desc"));
+
+onSnapshot(q, (snapshot) => {
+  trabajos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  render();
+});
+
+// 🎨 Render
+function render() {
+  container.innerHTML = "";
+
+  const visibles = trabajos.filter(t => 
+    filtroActual === "todos" || t.categoria === filtroActual
+  );
+
+  if (visibles.length === 0) {
+    container.innerHTML = "<p class='text-gray-500'>No hay trabajos en esta categoría.</p>";
+    return;
+  }
+
+  visibles.forEach(t => {
+    const card = document.createElement("div");
+    card.className = "p-4 border rounded-xl bg-white shadow hover:shadow-lg cursor-pointer transition";
+
+    card.innerHTML = `
+      <h3 class="font-bold text-lg">${t.titulo}</h3>
+      <p class="text-sm text-gray-600 capitalize">${t.categoria}</p>
+      <p class="text-sm mt-2 text-slate-700">${t.descripcion}</p>
+      <div class="mt-3 font-bold text-orange-600 text-lg">€${t.precio}</div>
+    `;
+
+    card.addEventListener("click", () => {
+      window.location.href = "chat.html?job=" + t.id;
+    });
+
+    container.appendChild(card);
+  });
+}
+
+// 🧭 Filtros
+filtros.forEach(btn => {
+  btn.addEventListener("click", () => {
+    filtroActual = btn.dataset.cat;
+
+    filtros.forEach(b => b.classList.remove("filtro-activo"));
+    btn.classList.add("filtro-activo");
+
+    render();
+  });
+});
+</script>
 
 </body>
 </html>
