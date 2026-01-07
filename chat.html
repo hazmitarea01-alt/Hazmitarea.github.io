@@ -92,6 +92,17 @@ await setDoc(chatRef, {
   participants: [uid, ownerUid],
   updatedAt: serverTimestamp()
 }, { merge: true });
+import { setDoc, doc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+const chatResumenId = `${jobId}_${chatId}`;
+
+await setDoc(doc(db, "userChats", chatResumenId), {
+  jobId: jobId,
+  chatId: chatId,
+  users: [uid, ownerUid],
+  lastMessage: msgInput.value,
+  updatedAt: serverTimestamp()
+}, { merge: true });
 
 
   // escuchar mensajes
