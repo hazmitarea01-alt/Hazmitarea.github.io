@@ -21,7 +21,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-import { getFirestore, collectionGroup, query, where, onSnapshot, doc, getDoc } 
+import { getFirestore, collection, query, where, orderBy, onSnapshot, doc, getDoc } 
   from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -45,42 +45,45 @@ onAuthStateChanged(auth, (user) => {
     window.location.href = "index.html";
     return;
   }
-
   const q = query(
-    collectionGroup(db, "chats"),
-    where("participants", "array-contains", user.uid)
-  );
+  collection(db, "userChats"),
+  where("users", "array-contains", user.uid),
+  orderBy("updatedAt", "desc")
+);
 
-  onSnapshot(q, async (snapshot) => {
-    container.innerHTML = "";
+onSnapshot(q, async (snapshot) => {
+  container.innerHTML = "";
 
-    if (snapshot.empty) {
-      container.innerHTML = "<p class='text-gray-500'>No tienes chats todavía.</p>";
-      return;
-    }
+  if (snapshot.empty) {
+    container.innerHTML = "<p class='text-gray-500'>No tienes chats todavía.</p>";
+    return;
+  }
 
-    for (const docSnap of snapshot.docs) {
-      const chat = docSnap.data();
-      const jobSnap = await getDoc(doc(db, "jobs", chat.jobId));
-      const titulo = jobSnap.exists() ? jobSnap.data().titulo : "Trabajo";
+  for (const docSnap of snapshot.docs) {
+    const chat = docSnap.data();
 
-      const div = document.createElement("div");
-      div.className = "p-4 bg-white rounded-xl shadow hover:shadow-lg cursor-pointer";
+    // obtener título del trabajo
+    const jobSnap = await getDoc(doc(db, "jobs", chat.jobId));
+    const titulo = jobSnap.exists() ? jobSnap.data().titulo : "Trabajo";
 
-      div.innerHTML = `
-        <div class="font-bold">${titulo}</div>
-        <div class="text-sm text-orange-600 font-semibold">Nuevo mensaje</div>
+    const div = document.createElement("div");
+    div.className = "p-4 bg-white rounded-xl shadow hover:shadow-lg cursor-pointer";
 
-      `;
+    div.innerHTML = `
+      <div class="font-bold">${titulo}</div>
+      <div class="text-sm text-gray-600 truncate">${chat.lastMessage}</div>
+    `;
 
-      div.onclick = () => {
-        window.location.href = `chat.html?job=${chat.jobId}`;
-      };
+    div.onclick = () => {
+      window.location.href = `chat.html?job=${chat.jobId}`;
+    };
 
-      container.appendChild(div);
-    }
-  });
+    container.appendChild(div);
+  }
 });
+
+}
+
 </script>
 
 
