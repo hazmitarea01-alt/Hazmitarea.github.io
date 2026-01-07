@@ -44,7 +44,7 @@ import {
   setDoc
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
-// Firebase config
+// Configuración de Firebase (tuya)
 const firebaseConfig = {
   apiKey: "AIzaSyBlsVCnScpWppXMQLvAtu54XS_2rxj84Eo",
   authDomain: "hazmitarea01-ab6c6.firebaseapp.com",
@@ -59,18 +59,19 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 // DOM
-const mensajesEl = document.getElementById("mensajes");
 const tituloTrabajoEl = document.getElementById("tituloTrabajo");
+const mensajesEl = document.getElementById("mensajes");
 const formChat = document.getElementById("formChat");
 const msgInput = document.getElementById("msg");
 
-// Params
+// Obtener ID de trabajo
 const params = new URLSearchParams(window.location.search);
 const jobId = params.get("job");
 
-let ownerUid = null;
+let currentUser;
+let ownerUid;
 
-// Cargar trabajo
+// Cargar datos del trabajo
 async function cargarTrabajo() {
   const snap = await getDoc(doc(db, "jobs", jobId));
   if (!snap.exists()) {
@@ -82,27 +83,31 @@ async function cargarTrabajo() {
 }
 
 // Iniciar chat
-async function iniciarChat(user) {
-  const chatId = jobId + "_" + user.uid;
+function iniciarChat(user) {
+  currentUser = user;
 
-  // Escuchar mensajes
-  const q = query(
+  // ID único de chat
+  const chatId = `${jobId}_${user.uid}`;
+
+  // Consulta de mensajes
+  const mensajesQuery = query(
     collection(db, "messages"),
     where("chatId", "==", chatId),
     orderBy("fecha", "asc")
   );
 
-  onSnapshot(q, (snap) => {
+  onSnapshot(mensajesQuery, (snapshot) => {
     mensajesEl.innerHTML = "";
-    snap.forEach(d => {
-      const m = d.data();
+    snapshot.forEach((docu) => {
+      const m = docu.data();
       const mine = m.uid === user.uid;
       mensajesEl.innerHTML += `
         <div class="${mine ? "text-right" : "text-left"}">
           <span class="inline-block px-3 py-2 rounded-lg ${mine ? "bg-orange-200" : "bg-gray-200"}">
             ${m.texto}
           </span>
-        </div>`;
+        </div>
+      `;
     });
     mensajesEl.scrollTop = mensajesEl.scrollHeight;
   });
@@ -111,8 +116,10 @@ async function iniciarChat(user) {
   formChat.onsubmit = async (e) => {
     e.preventDefault();
 
-    const texto = msgInput.value;
+    const texto = msgInput.value.trim();
+    if (!texto) return;
 
+    // Guardar mensaje
     await addDoc(collection(db, "messages"), {
       chatId,
       jobId,
@@ -121,7 +128,7 @@ async function iniciarChat(user) {
       fecha: serverTimestamp()
     });
 
-    // Resumen del chat
+    // Actualizar resumen de chat
     await setDoc(doc(db, "userChats", chatId), {
       chatId,
       jobId,
@@ -134,11 +141,11 @@ async function iniciarChat(user) {
   };
 }
 
-// Auth
+// Autenticación
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
-    alert("Debes iniciar sesión");
-    location.href = "index.html";
+    alert("Debes iniciar sesión para chatear.");
+    window.location.href = "index.html";
     return;
   }
 
@@ -146,6 +153,7 @@ onAuthStateChanged(auth, async (user) => {
   iniciarChat(user);
 });
 </script>
+
 
 
 </body>
