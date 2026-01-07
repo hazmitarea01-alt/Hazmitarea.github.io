@@ -82,6 +82,18 @@
   const mensajesRef = collection(db, "jobs", jobId, "chats", chatId, "mensajes");
   const q = query(mensajesRef, orderBy("fecha", "asc"));
 
+   import { setDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+const chatRef = doc(db, "jobs", jobId, "chats", chatId);
+
+// crear el chat si no existe
+await setDoc(chatRef, {
+  jobId: jobId,
+  participants: [uid, ownerUid],
+  updatedAt: serverTimestamp()
+}, { merge: true });
+
+
   // escuchar mensajes
   onSnapshot(q, (snap) => {
     mensajesEl.innerHTML = "";
@@ -127,79 +139,6 @@
   });
 
   cargarTrabajo();
-</script>
-<script type="module">
-import { getFirestore, collection, addDoc, query, where, onSnapshot, orderBy } 
-  from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
-import { getAuth, onAuthStateChanged } 
-  from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-
-const db = getFirestore();
-const auth = getAuth();
-
-// Obtener parámetro job de la URL
-const urlParams = new URLSearchParams(window.location.search);
-const jobId = urlParams.get("job");
-
-if (!jobId) {
-  alert("Trabajo no encontrado");
-  window.location.href = "/";
-}
-
-// Referencias UI
-const chatForm = document.getElementById("chatForm");
-const chatInput = document.getElementById("chatInput");
-const chatMessages = document.getElementById("chatMessages");
-
-// Mantener chat único: combinación usuario–trabajo
-let currentUser;
-
-// Esperar a que el usuario esté logueado
-onAuthStateChanged(auth, (user) => {
-  if (!user) {
-    alert("Debes iniciar sesión para chatear");
-    window.location.href = "/";
-  }
-  currentUser = user;
-
-  // Cargar mensajes en tiempo real
-  const chatQuery = query(
-    collection(db, "chats"),
-    where("jobId", "==", jobId),
-    orderBy("timestamp", "asc")
-  );
-
-  onSnapshot(chatQuery, (snapshot) => {
-    chatMessages.innerHTML = "";
-    snapshot.forEach(doc => {
-      const msg = doc.data();
-      const div = document.createElement("div");
-      div.className = msg.senderUid === currentUser.uid 
-        ? "bg-orange-100 p-2 rounded-lg self-end text-right"
-        : "bg-gray-100 p-2 rounded-lg self-start";
-      div.textContent = msg.text;
-      chatMessages.appendChild(div);
-    });
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-  });
-});
-
-// Enviar mensaje
-chatForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const text = chatInput.value.trim();
-  if (!text) return;
-
-  await addDoc(collection(db, "chats"), {
-    jobId,
-    senderUid: currentUser.uid,
-    senderEmail: currentUser.email,
-    text,
-    timestamp: new Date()
-  });
-
-  chatInput.value = "";
-});
 </script>
 
 </body>
