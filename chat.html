@@ -28,129 +28,125 @@
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js"></script>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-  import { 
-    getFirestore, doc, getDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp 
-  } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  collection,
+  addDoc,
+  query,
+  where,
+  orderBy,
+  onSnapshot,
+  serverTimestamp,
+  setDoc
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
-  // Configuración Firebase (tuya)
-  const firebaseConfig = {
-    apiKey: "AIzaSyBlsVCnScpWppXMQLvAtu54XS_2rxj84Eo",
-    authDomain: "hazmitarea01-ab6c6.firebaseapp.com",
-    projectId: "hazmitarea01-ab6c6",
-    storageBucket: "hazmitarea01-ab6c6.appspot.com",
-    messagingSenderId: "771122045443",
-    appId: "1:771122045443:web:86ebc251ab550466b46436"
-  };
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyBlsVCnScpWppXMQLvAtu54XS_2rxj84Eo",
+  authDomain: "hazmitarea01-ab6c6.firebaseapp.com",
+  projectId: "hazmitarea01-ab6c6",
+  storageBucket: "hazmitarea01-ab6c6.appspot.com",
+  messagingSenderId: "771122045443",
+  appId: "1:771122045443:web:86ebc251ab550466b46436"
+};
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-  // Obtener ID del trabajo desde la URL
-  const params = new URLSearchParams(window.location.search);
- const jobId = params.get("job");
+// DOM
+const mensajesEl = document.getElementById("mensajes");
+const tituloTrabajoEl = document.getElementById("tituloTrabajo");
+const formChat = document.getElementById("formChat");
+const msgInput = document.getElementById("msg");
 
-  const tituloTrabajoEl = document.getElementById("tituloTrabajo");
-  const mensajesEl = document.getElementById("mensajes");
-  const formChat = document.getElementById("formChat");
-  const msgInput = document.getElementById("msg");
+// Params
+const params = new URLSearchParams(window.location.search);
+const jobId = params.get("job");
 
-  // Cargar datos del trabajo
-  async function cargarTrabajo() {
-    const ref = doc(db, "jobs", jobId);
-    const snap = await getDoc(ref);
+let ownerUid = null;
 
-    if (!snap.exists()) {
-      tituloTrabajoEl.textContent = "Trabajo no encontrado";
-      return;
-    }
-
-    tituloTrabajoEl.textContent = snap.data().titulo;
-    window.ownerUid = snap.data().ownerUid;
-
+// Cargar trabajo
+async function cargarTrabajo() {
+  const snap = await getDoc(doc(db, "jobs", jobId));
+  if (!snap.exists()) {
+    tituloTrabajoEl.textContent = "Trabajo no encontrado";
+    return;
   }
+  tituloTrabajoEl.textContent = snap.data().titulo;
+  ownerUid = snap.data().ownerUid;
+}
 
-  // Chat en tiempo real
- function iniciarChat(uid) {
-  const ownerUid = window.ownerUid;
+// Iniciar chat
+async function iniciarChat(user) {
+  const chatId = jobId + "_" + user.uid;
 
-  // Crear ID único del chat
-  const chatId = uid < ownerUid ? `${uid}_${ownerUid}` : `${ownerUid}_${uid}`;
+  // Escuchar mensajes
+  const q = query(
+    collection(db, "messages"),
+    where("chatId", "==", chatId),
+    orderBy("fecha", "asc")
+  );
 
-  const mensajesRef = collection(db, "jobs", jobId, "chats", chatId, "mensajes");
-  const q = query(mensajesRef, orderBy("fecha", "asc"));
-
-   import { setDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
-
-const chatRef = doc(db, "jobs", jobId, "chats", chatId);
-
-// crear el chat si no existe
-await setDoc(chatRef, {
-  jobId: jobId,
-  participants: [uid, ownerUid],
-  updatedAt: serverTimestamp()
-}, { merge: true });
-import { setDoc, doc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
-
-const chatResumenId = `${jobId}_${chatId}`;
-
-await setDoc(doc(db, "userChats", chatResumenId), {
-  jobId: jobId,
-  chatId: chatId,
-  users: [uid, ownerUid],
-  lastMessage: msgInput.value,
-  updatedAt: serverTimestamp()
-}, { merge: true });
-
-
-  // escuchar mensajes
   onSnapshot(q, (snap) => {
     mensajesEl.innerHTML = "";
-
-    snap.forEach(docu => {
-      const m = docu.data();
-      const alineacion = m.uid === uid ? "text-right" : "text-left";
-      const color = m.uid === uid ? "bg-orange-200" : "bg-gray-200";
-
+    snap.forEach(d => {
+      const m = d.data();
+      const mine = m.uid === user.uid;
       mensajesEl.innerHTML += `
-        <div class="${alineacion}">
-          <span class="inline-block px-3 py-2 rounded-lg ${color} mt-1">${m.texto}</span>
-        </div>
-      `;
+        <div class="${mine ? "text-right" : "text-left"}">
+          <span class="inline-block px-3 py-2 rounded-lg ${mine ? "bg-orange-200" : "bg-gray-200"}">
+            ${m.texto}
+          </span>
+        </div>`;
     });
-
     mensajesEl.scrollTop = mensajesEl.scrollHeight;
   });
 
-  // Enviar mensajes
-  formChat.addEventListener("submit", async (e) => {
+  // Enviar mensaje
+  formChat.onsubmit = async (e) => {
     e.preventDefault();
 
-    await addDoc(mensajesRef, {
-      texto: msgInput.value,
-      uid: uid,
+    const texto = msgInput.value;
+
+    await addDoc(collection(db, "messages"), {
+      chatId,
+      jobId,
+      uid: user.uid,
+      texto,
       fecha: serverTimestamp()
     });
 
+    // Resumen del chat
+    await setDoc(doc(db, "userChats", chatId), {
+      chatId,
+      jobId,
+      users: [user.uid, ownerUid],
+      lastMessage: texto,
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+
     msgInput.value = "";
-  });
+  };
 }
 
-  // Detectar si usuario está logueado
-  onAuthStateChanged(auth, (user) => {
-    if (!user) {
-      alert("Debes iniciar sesión para usar el chat.");
-      window.location.href = "index.html";
-      return;
-    }
+// Auth
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    alert("Debes iniciar sesión");
+    location.href = "index.html";
+    return;
+  }
 
-    iniciarChat(user.uid);
-  });
-
-  cargarTrabajo();
+  await cargarTrabajo();
+  iniciarChat(user);
+});
 </script>
+
 
 </body>
 </html>
