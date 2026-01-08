@@ -18,12 +18,21 @@
     <p class="text-gray-500">Cargando chats...</p>
   </div>
 </main>
+  
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-import { getFirestore, collection, query, where, orderBy, onSnapshot, doc, getDoc } 
-  from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+import {
+  getFirestore,
+  collectionGroup,
+  query,
+  where,
+  getDocs,
+  doc,
+  getDoc
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
+/* 🔧 Firebase */
 const firebaseConfig = {
   apiKey: "AIzaSyBlsVCnScpWppXMQLvAtu54XS_2rxj84Eo",
   authDomain: "hazmitarea01-ab6c6.firebaseapp.com",
@@ -39,31 +48,43 @@ const db = getFirestore(app);
 
 const container = document.getElementById("chatsContainer");
 
-onAuthStateChanged(auth, (user) => {
+/* 🔐 Auth */
+onAuthStateChanged(auth, async (user) => {
   if (!user) {
     alert("Debes iniciar sesión");
     window.location.href = "index.html";
     return;
   }
+
+  container.innerHTML = "<p class='text-gray-500'>Buscando chats...</p>";
+
+  // 🔍 buscar mensajes donde yo soy autor
   const q = query(
-  collection(db, "userChats"),
-  where("users", "array-contains", user.uid),
-  orderBy("updatedAt", "desc")
-);
+    collectionGroup(db, "mensajes"),
+    where("uid", "==", user.uid)
+  );
 
-onSnapshot(q, async (snapshot) => {
-  container.innerHTML = "";
+  const snap = await getDocs(q);
 
-  if (snapshot.empty) {
+  if (snap.empty) {
     container.innerHTML = "<p class='text-gray-500'>No tienes chats todavía.</p>";
     return;
   }
 
-  for (const docSnap of snapshot.docs) {
-    const chat = docSnap.data();
+  container.innerHTML = "";
 
-    // obtener título del trabajo
-    const jobSnap = await getDoc(doc(db, "jobs", chat.jobId));
+  const chatsUnicos = new Set();
+
+  snap.forEach(docu => {
+    const path = docu.ref.path;
+    const parts = path.split("/");
+
+    const jobId = parts[1];
+    chatsUnicos.add(jobId);
+  });
+
+  for (const jobId of chatsUnicos) {
+    const jobSnap = await getDoc(doc(db, "jobs", jobId));
     const titulo = jobSnap.exists() ? jobSnap.data().titulo : "Trabajo";
 
     const div = document.createElement("div");
@@ -71,21 +92,17 @@ onSnapshot(q, async (snapshot) => {
 
     div.innerHTML = `
       <div class="font-bold">${titulo}</div>
-      <div class="text-sm text-gray-600 truncate">${chat.lastMessage}</div>
+      <div class="text-sm text-orange-600">Abrir chat</div>
     `;
 
     div.onclick = () => {
-      window.location.href = `chat.html?job=${chat.jobId}`;
+      window.location.href = `chat.html?job=${jobId}`;
     };
 
     container.appendChild(div);
   }
 });
-
-}
-
 </script>
-
 
 
 </body>
