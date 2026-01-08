@@ -107,14 +107,44 @@ function iniciarChat(userUid) {
   });
 
   formChat.onsubmit = async (e) => {
-    e.preventDefault();
-    await addDoc(mensajesRef, {
-      texto: msgInput.value,
-      uid: userUid,
-      fecha: serverTimestamp()
-    });
-    msgInput.value = "";
+  e.preventDefault();
+
+  const texto = msgInput.value.trim();
+  if (!texto) return;
+
+  // 1️⃣ Guardar mensaje
+  await addDoc(mensajesRef, {
+    texto,
+    uid: userUid,
+    fecha: serverTimestamp()
+  });
+
+  // 2️⃣ Guardar resumen del chat PARA LOS DOS USUARIOS
+  const resumenChat = {
+    jobId: jobId,
+    chatId: chatId,
+    participants: [userUid, ownerUid],
+    lastMessage: texto,
+    updatedAt: serverTimestamp()
   };
+
+  // Para el que envía
+  await setDoc(
+    doc(db, "userChats", `${userUid}_${chatId}`),
+    resumenChat,
+    { merge: true }
+  );
+
+  // Para el otro usuario
+  await setDoc(
+    doc(db, "userChats", `${ownerUid}_${chatId}`),
+    resumenChat,
+    { merge: true }
+  );
+
+  msgInput.value = "";
+};
+
 }
 
 /* 🔐 Auth */
