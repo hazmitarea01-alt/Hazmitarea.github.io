@@ -21,12 +21,6 @@
     <button class="bg-orange-600 text-white px-4 rounded-lg">Enviar</button>
   </form>
 </div>
-
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js"></script>
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
@@ -37,14 +31,13 @@ import {
   collection,
   addDoc,
   query,
-  where,
   orderBy,
   onSnapshot,
   serverTimestamp,
   setDoc
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
-// Configuración de Firebase (tuya)
+/* 🔧 Firebase config */
 const firebaseConfig = {
   apiKey: "AIzaSyBlsVCnScpWppXMQLvAtu54XS_2rxj84Eo",
   authDomain: "hazmitarea01-ab6c6.firebaseapp.com",
@@ -58,115 +51,82 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// DOM
-const tituloTrabajoEl = document.getElementById("tituloTrabajo");
+/* 🧠 DOM */
+const params = new URLSearchParams(window.location.search);
+const jobId = params.get("job");
+
+const tituloEl = document.getElementById("tituloTrabajo");
 const mensajesEl = document.getElementById("mensajes");
 const formChat = document.getElementById("formChat");
 const msgInput = document.getElementById("msg");
 
-// Obtener ID de trabajo
-const params = new URLSearchParams(window.location.search);
-const jobId = params.get("job");
+let ownerUid = null;
 
-let currentUser;
-let ownerUid;
-
-// Cargar datos del trabajo
+/* 📌 Cargar trabajo */
 async function cargarTrabajo() {
   const snap = await getDoc(doc(db, "jobs", jobId));
   if (!snap.exists()) {
-    tituloTrabajoEl.textContent = "Trabajo no encontrado";
+    tituloEl.textContent = "Trabajo no encontrado";
     return;
   }
-  tituloTrabajoEl.textContent = snap.data().titulo;
+  tituloEl.textContent = snap.data().titulo;
   ownerUid = snap.data().ownerUid;
 }
 
-// Iniciar chat
-function iniciarChat(user) {
-  currentUser = user;
+/* 💬 Iniciar chat */
+function iniciarChat(userUid) {
+  const chatId =
+    userUid < ownerUid ? `${userUid}_${ownerUid}` : `${ownerUid}_${userUid}`;
 
-  // ID único de chat
-  const chatId = `${jobId}_${user.uid}`;
+  const chatRef = doc(db, "jobs", jobId, "chats", chatId);
+  const mensajesRef = collection(chatRef, "mensajes");
 
-  // Consulta de mensajes
-  const mensajesQuery = query(
-    collection(db, "messages"),
-    where("chatId", "==", chatId),
-    orderBy("fecha", "asc")
-  );
+  setDoc(chatRef, {
+    jobId,
+    participants: [userUid, ownerUid],
+    updatedAt: serverTimestamp()
+  }, { merge: true });
 
-  onSnapshot(mensajesQuery, (snapshot) => {
+  const q = query(mensajesRef, orderBy("fecha"));
+
+  onSnapshot(q, snap => {
     mensajesEl.innerHTML = "";
-    snapshot.forEach((docu) => {
-      const m = docu.data();
-      const mine = m.uid === user.uid;
+    snap.forEach(d => {
+      const m = d.data();
+      const align = m.uid === userUid ? "text-right" : "text-left";
+      const bg = m.uid === userUid ? "bg-orange-200" : "bg-gray-200";
+
       mensajesEl.innerHTML += `
-        <div class="${mine ? "text-right" : "text-left"}">
-          <span class="inline-block px-3 py-2 rounded-lg ${mine ? "bg-orange-200" : "bg-gray-200"}">
+        <div class="${align}">
+          <span class="inline-block px-3 py-2 rounded-lg ${bg} mt-1">
             ${m.texto}
           </span>
-        </div>
-      `;
+        </div>`;
     });
     mensajesEl.scrollTop = mensajesEl.scrollHeight;
   });
 
-  formChat.addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const texto = msgInput.value.trim();
-  if (!texto) return;
-
-  console.log("📨 Enviando mensaje:", texto);
-
-  await addDoc(collection(db, "messages"), {
-    chatId,
-    jobId,
-    uid: user.uid,
-    texto,
-    fecha: serverTimestamp()
-  });
-
-  await setDoc(doc(db, "userChats", chatId), {
-    chatId,
-    jobId,
-    users: [user.uid, ownerUid],
-    lastMessage: texto,
-    updatedAt: serverTimestamp()
-  }, { merge: true });
-
-  msgInput.value = "";
-});
-
-
-    // Actualizar resumen de chat
-    await setDoc(doc(db, "userChats", chatId), {
-      chatId,
-      jobId,
-      users: [user.uid, ownerUid],
-      lastMessage: texto,
-      updatedAt: serverTimestamp()
-    }, { merge: true });
-
+  formChat.onsubmit = async (e) => {
+    e.preventDefault();
+    await addDoc(mensajesRef, {
+      texto: msgInput.value,
+      uid: userUid,
+      fecha: serverTimestamp()
+    });
     msgInput.value = "";
   };
 }
 
-// Autenticación
-onAuthStateChanged(auth, async (user) => {
+/* 🔐 Auth */
+onAuthStateChanged(auth, user => {
   if (!user) {
-    alert("Debes iniciar sesión para chatear.");
+    alert("Debes iniciar sesión");
     window.location.href = "index.html";
     return;
   }
-
-  await cargarTrabajo();
-  iniciarChat(user);
+  cargarTrabajo().then(() => iniciarChat(user.uid));
 });
 </script>
-
-
 
 </body>
 </html>
