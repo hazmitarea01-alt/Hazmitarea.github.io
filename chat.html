@@ -119,7 +119,7 @@ function iniciarChat(userUid) {
     fecha: serverTimestamp()
   });
 
-  // 2️⃣ Guardar resumen del chat PARA LOS DOS USUARIOS
+  // 2️⃣ Guardar resumen del chat PARA AMBOS
   const resumenChat = {
     jobId: jobId,
     chatId: chatId,
@@ -128,14 +128,14 @@ function iniciarChat(userUid) {
     updatedAt: serverTimestamp()
   };
 
-  // Para el que envía
+  // Para quien envía
   await setDoc(
     doc(db, "userChats", `${userUid}_${chatId}`),
     resumenChat,
     { merge: true }
   );
 
-  // Para el otro usuario
+  // Para el dueño del trabajo (receptor)
   await setDoc(
     doc(db, "userChats", `${ownerUid}_${chatId}`),
     resumenChat,
@@ -144,6 +144,7 @@ function iniciarChat(userUid) {
 
   msgInput.value = "";
 };
+
 
 }
 
