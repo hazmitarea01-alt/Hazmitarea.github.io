@@ -75,8 +75,8 @@ async function cargarTrabajo() {
 
 /* 💬 Iniciar chat */
 function iniciarChat(userUid) {
-  const chatId =
-    userUid < ownerUid ? `${userUid}_${ownerUid}` : `${ownerUid}_${userUid}`;
+ const chatId = jobId;
+
 
   const chatRef = doc(db, "jobs", jobId, "chats", chatId);
   const mensajesRef = collection(chatRef, "mensajes");
