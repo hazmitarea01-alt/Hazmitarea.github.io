@@ -118,6 +118,16 @@ function iniciarChat(userUid) {
     uid: userUid,
     fecha: serverTimestamp()
   });
+// 🔔 Actualizar resumen del chat (para Mis Chats)
+const resumenId = `${jobId}_${chatId}`;
+
+await setDoc(doc(db, "userChats", resumenId), {
+  jobId: jobId,
+  chatId: chatId,
+  users: [userUid, ownerUid],
+  lastMessage: msgInput.value,
+  updatedAt: serverTimestamp()
+}, { merge: true });
 
   // 2️⃣ Guardar resumen del chat PARA AMBOS
   const resumenChat = {
